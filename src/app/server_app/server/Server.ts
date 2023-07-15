@@ -18,6 +18,8 @@ export class Server {
             console.log(`Got request for ${req.url}`);
             await this.handleRequest(req, res);
             res.end();
+            console.log('end called');
+            
         });
         this.server.listen(8080);
         console.log('server started')
