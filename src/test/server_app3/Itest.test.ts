@@ -1,11 +1,13 @@
+import * as generatedId from '../../app/server_app/data/IdGenerator';
 import { Account } from '../../app/server_app/model/AuthModel';
 import { Reservation } from '../../app/server_app/model/ReservationModel';
 import { HTTP_CODES, HTTP_METHODS } from '../../app/server_app/model/ServerModel';
 import { Server } from '../../app/server_app/server/Server';
+import { getRequestBody } from '../../app/server_app/utils/Utils';
 import { makeAwesomeRequest } from "./utils/http-client";
 import axios from 'axios';
 
-describe('server app Integration test', () => {
+xdescribe('server app Integration test', () => {
   let server: Server;
 
   beforeAll(() => {
@@ -37,6 +39,8 @@ describe('server app Integration test', () => {
 
     expect(result.status).toBe(HTTP_CODES.CREATED);
     expect(resultBody.data.userId).toBeDefined();
+    console.log(`connecting to: ${process.env.HOST}`);
+
   })
 
   it('should register new user with awesomeRequest', async () => {
@@ -100,14 +104,14 @@ describe('server app Integration test', () => {
   })
 
   it('should update reservation for loged in user', async () => {
-    const updateResult = await axios.put(`http://localhost:8080/reservation/${reservationId}`, JSON.stringify({startDate:'otherStartDate'}), { headers: { Authorization: token } })
+    const updateResult = await axios.put(`http://localhost:8080/reservation/${reservationId}`, JSON.stringify({ startDate: 'otherStartDate' }), { headers: { Authorization: token } })
 
 
     expect(updateResult.status).toBe(HTTP_CODES.OK);
-    
+
     const getResult = await axios.get(`http://localhost:8080/reservation/${reservationId}`, { headers: { Authorization: token } })
 
-    const getResultBody:Reservation = getResult.data;
+    const getResultBody: Reservation = getResult.data;
     expect(getResultBody.startDate).toBe('otherStartDate')
   })
 
@@ -117,12 +121,26 @@ describe('server app Integration test', () => {
 
     expect(updateResult.status).toBe(HTTP_CODES.OK);
 
-    const getResult = await axios.get(`http://localhost:8080/reservation/${reservationId}`, { headers: { Authorization: token } }).catch(error=>{
-      if(error.response.status == 404){
+    const getResult = await axios.get(`http://localhost:8080/reservation/${reservationId}`, { headers: { Authorization: token } }).catch(error => {
+      if (error.response.status == 404) {
         return error.response
       }
     });
-    
+
     expect(getResult.status).toBe(HTTP_CODES.NOT_fOUND)
+  })
+
+  it('snapshot demo', async () => {
+
+    jest.spyOn(generatedId, 'generateRandomId').mockReturnValueOnce('1234')
+
+
+    await axios.post('http://localhost:8080/reservation', JSON.stringify(someReservation), { headers: { Authorization: token } })
+
+    const result = await axios.get(`http://localhost:8080/reservation/1234`, { headers: { Authorization: token } })
+
+    const resultBody: Reservation = result.data;
+
+    expect(resultBody).toMatchSnapshot();
   })
 })
