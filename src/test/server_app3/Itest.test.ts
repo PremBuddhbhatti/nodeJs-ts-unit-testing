@@ -132,7 +132,7 @@ xdescribe('server app Integration test', () => {
 
   it('snapshot demo', async () => {
 
-    jest.spyOn(generatedId, 'generateRandomId').mockReturnValueOnce('1234')
+    jest.spyOn(generatedId, 'generateRandomId').mockReturnValueOnce('12334')
 
 
     await axios.post('http://localhost:8080/reservation', JSON.stringify(someReservation), { headers: { Authorization: token } })
